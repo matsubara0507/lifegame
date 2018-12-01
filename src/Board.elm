@@ -3,7 +3,7 @@ module Board exposing (Board, Cell(..), init, view)
 import Array exposing (Array)
 import Debug
 import Html exposing (Html)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (src, style)
 import String
 
 
@@ -46,12 +46,22 @@ view board =
 
 viewCell : Cell -> Html msg
 viewCell cell =
-    Html.img
-        [ style "width" (unit |> vmin)
-        , style "height" (unit |> vmin)
-        , style "margin" "0"
-        ]
-        []
+    let
+        styleAttrs =
+            [ style "width" (unit |> vmin)
+            , style "height" (unit |> vmin)
+            , style "margin" "0"
+            ]
+
+        imageLink =
+            case cell of
+                Dead ->
+                    []
+
+                Alive ->
+                    [ src "https://avatars0.githubusercontent.com/u/4686622?s=400&v=4" ]
+    in
+    Html.img (List.append styleAttrs imageLink) []
 
 
 unit : Int
