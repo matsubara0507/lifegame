@@ -4,13 +4,15 @@ import Array exposing (Array)
 import Debug
 import Html exposing (Html)
 import Html.Attributes exposing (src, style)
-import Html.Events exposing (onMouseOver)
+import Html.Events.Extra.Mouse as Mouse
+import Html.Events.Extra.Touch as Touch
 import String
 
 
 type alias Board =
     { particle : Int
     , cells : Array Cell
+    , planting : Bool
     }
 
 
@@ -21,7 +23,7 @@ type Cell
 
 init : Int -> Board
 init n =
-    { particle = n, cells = Array.repeat (n * n) Dead }
+    { particle = n, cells = Array.repeat (n * n) Dead, planting = False }
 
 
 concatIndexedMapWith : (List a -> b) -> (Int -> Cell -> a) -> Board -> b
@@ -34,6 +36,7 @@ concatIndexedMapWith f g board =
 
 type Msg
     = Born Int
+    | Planting
 
 
 update : Msg -> Board -> Board
@@ -41,6 +44,9 @@ update msg board =
     case msg of
         Born idx ->
             born idx board
+
+        Planting ->
+            { board | planting = xor board.planting True }
 
 
 born : Int -> Board -> Board
@@ -73,8 +79,16 @@ viewCell board idx cell =
             [ style "width" (maxLength / toFloat board.particle |> vmin)
             , style "height" (maxLength / toFloat board.particle |> vmin)
             , style "margin" "0"
-            , onMouseOver (Born idx)
             ]
+
+        bornAttr =
+            if board.planting then
+                [ Mouse.onClick (always Planting)
+                , Mouse.onOver (always (Born idx))
+                ]
+
+            else
+                [ Mouse.onClick (always Planting) ]
 
         imageLink =
             case cell of
@@ -84,7 +98,7 @@ viewCell board idx cell =
                 Alive ->
                     [ src "https://avatars0.githubusercontent.com/u/4686622?s=400&v=4" ]
     in
-    Html.img (List.append styleAttrs imageLink) []
+    Html.img (List.concat [ styleAttrs, bornAttr, imageLink ]) []
 
 
 maxLength : Float
