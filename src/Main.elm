@@ -52,14 +52,15 @@ defaultModel =
 
 type Msg
     = SliderMsg SingleSlider.Msg
+    | BoardMsg Board.Msg
 
 
 update msg model =
     case msg of
-        SliderMsg smsg ->
+        SliderMsg subMsg ->
             let
                 ( updatedSlider, cmd, _ ) =
-                    SingleSlider.update smsg model.slider
+                    SingleSlider.update subMsg model.slider
 
                 updatedBoard =
                     Board.init (truncate updatedSlider.value)
@@ -68,6 +69,9 @@ update msg model =
             , Cmd.batch [ Cmd.map SliderMsg cmd ]
             )
 
+        BoardMsg subMsg ->
+            ( { model | board = Board.update subMsg model.board }, Cmd.none )
+
 
 view model =
     div []
@@ -75,7 +79,7 @@ view model =
             [ style "text-align" "center"
             ]
             [ Html.map SliderMsg (SingleSlider.view model.slider) ]
-        , Board.view model.board
+        , Html.map BoardMsg (Board.view model.board)
         ]
 
 

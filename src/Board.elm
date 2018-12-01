@@ -1,9 +1,10 @@
-module Board exposing (Board, Cell(..), init, view)
+module Board exposing (Board, Cell(..), Msg(..), born, concatIndexedMapWith, init, kill, update, view)
 
 import Array exposing (Array)
 import Debug
 import Html exposing (Html)
 import Html.Attributes exposing (src, style)
+import Html.Events exposing (onMouseOver)
 import String
 
 
@@ -23,15 +24,36 @@ init n =
     { particle = n, cells = Array.repeat (n * n) Dead }
 
 
-concatMapWith : (List a -> b) -> (Cell -> a) -> Board -> b
-concatMapWith f g board =
+concatIndexedMapWith : (List a -> b) -> (Int -> Cell -> a) -> Board -> b
+concatIndexedMapWith f g board =
     board.cells
-        |> Array.map g
+        |> Array.indexedMap g
         |> Array.toList
         |> f
 
 
-view : Board -> Html msg
+type Msg
+    = Born Int
+
+
+update : Msg -> Board -> Board
+update msg board =
+    case msg of
+        Born idx ->
+            born idx board
+
+
+born : Int -> Board -> Board
+born idx board =
+    { board | cells = Array.set idx Alive board.cells }
+
+
+kill : Int -> Board -> Board
+kill idx board =
+    { board | cells = Array.set idx Dead board.cells }
+
+
+view : Board -> Html Msg
 view board =
     let
         attr =
@@ -41,16 +63,17 @@ view board =
             , style "margin-right" "auto"
             ]
     in
-    concatMapWith (Html.div attr) (viewCell board) board
+    concatIndexedMapWith (Html.div attr) (viewCell board) board
 
 
-viewCell : Board -> Cell -> Html msg
-viewCell board cell =
+viewCell : Board -> Int -> Cell -> Html Msg
+viewCell board idx cell =
     let
         styleAttrs =
             [ style "width" (maxLength / toFloat board.particle |> vmin)
             , style "height" (maxLength / toFloat board.particle |> vmin)
             , style "margin" "0"
+            , onMouseOver (Born idx)
             ]
 
         imageLink =
