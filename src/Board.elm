@@ -35,21 +35,21 @@ view : Board -> Html msg
 view board =
     let
         attr =
-            [ style "width" (board.particle * unit |> vmin)
-            , style "height" (board.particle * unit |> vmin)
+            [ style "width" (maxLength |> vmin)
+            , style "height" (maxLength |> vmin)
             , style "margin-left" "auto"
             , style "margin-right" "auto"
             ]
     in
-    concatMapWith (Html.div attr) viewCell board
+    concatMapWith (Html.div attr) (viewCell board) board
 
 
-viewCell : Cell -> Html msg
-viewCell cell =
+viewCell : Board -> Cell -> Html msg
+viewCell board cell =
     let
         styleAttrs =
-            [ style "width" (unit |> vmin)
-            , style "height" (unit |> vmin)
+            [ style "width" (maxLength / toFloat board.particle |> vmin)
+            , style "height" (maxLength / toFloat board.particle |> vmin)
             , style "margin" "0"
             ]
 
@@ -64,11 +64,11 @@ viewCell cell =
     Html.img (List.append styleAttrs imageLink) []
 
 
-unit : Int
-unit =
-    3
+maxLength : Float
+maxLength =
+    90.0
 
 
-vmin : Int -> String
+vmin : Float -> String
 vmin n =
-    String.append (String.fromInt n) "vmin"
+    String.append (String.fromFloat n) "vmin"
