@@ -4,8 +4,7 @@ import Array exposing (Array)
 import Debug
 import Html exposing (Html)
 import Html.Attributes exposing (src, style)
-import Html.Events.Extra.Mouse as Mouse
-import Html.Events.Extra.Touch as Touch
+import Html.Events.Extra.Pointer as Pointer
 import String
 
 
@@ -83,12 +82,12 @@ viewCell board idx cell =
 
         bornAttr =
             if board.planting then
-                [ Mouse.onClick (always Planting)
-                , Mouse.onOver (always (Born idx))
+                [ Pointer.onDown (always Planting)
+                , Pointer.onOver (always (Born idx))
                 ]
 
             else
-                [ Mouse.onClick (always Planting) ]
+                [ Pointer.onDown (always Planting) ]
 
         imageLink =
             case cell of
