@@ -11,11 +11,13 @@ import Time
 
 main : Program () Model Msg
 main =
-    Browser.element
-        { init = always ( defaultModel, Cmd.none )
+    Browser.application
+        { init = \_ _ _ -> ( defaultModel, Cmd.none )
         , update = update
         , view = view
         , subscriptions = subscriptions
+        , onUrlRequest = always ChangeUrl
+        , onUrlChange = always ChangeUrl
         }
 
 
@@ -71,6 +73,7 @@ type Msg
     | TickSliderMsg SingleSlider.Msg
     | BoardMsg Board.Msg
     | NextTick
+    | ChangeUrl
 
 
 update msg model =
@@ -102,6 +105,9 @@ update msg model =
         NextTick ->
             ( { model | board = Board.next model.board }, Cmd.none )
 
+        ChangeUrl ->
+            ( model, Cmd.none )
+
 
 view model =
     let
@@ -110,7 +116,8 @@ view model =
             , style "margin-right" "10px"
             ]
     in
-    div []
+    { title = "Life Game"
+    , body =
         [ div
             [ style "text-align" "center"
             , style "display" "flex"
@@ -123,6 +130,7 @@ view model =
             ]
         , Html.map BoardMsg (Board.view model.board)
         ]
+    }
 
 
 subscriptions model =

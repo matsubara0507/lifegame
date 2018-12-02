@@ -4393,6 +4393,7 @@ function _Browser_load(url)
 		}
 	}));
 }
+var author$project$Main$ChangeUrl = {$: 'ChangeUrl'};
 var author$project$Board$Dead = {$: 'Dead'};
 var elm$core$Array$branchFactor = 32;
 var elm$core$Array$Array_elm_builtin = F4(
@@ -5821,7 +5822,7 @@ var author$project$Main$update = F2(
 							board: A2(author$project$Board$update, subMsg, model.board)
 						}),
 					elm$core$Platform$Cmd$none);
-			default:
+			case 'NextTick':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -5829,6 +5830,8 @@ var author$project$Main$update = F2(
 							board: author$project$Board$next(model.board)
 						}),
 					elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 		}
 	});
 var author$project$Board$concatIndexedMapWith = F3(
@@ -6399,10 +6402,8 @@ var author$project$Main$view = function (model) {
 			A2(elm$html$Html$Attributes$style, 'margin-left', '10px'),
 			A2(elm$html$Html$Attributes$style, 'margin-right', '10px')
 		]);
-	return A2(
-		elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
+	return {
+		body: _List_fromArray(
 			[
 				A2(
 				elm$html$Html$div,
@@ -6439,7 +6440,9 @@ var author$project$Main$view = function (model) {
 				elm$html$Html$map,
 				author$project$Main$BoardMsg,
 				author$project$Board$view(model.board))
-			]));
+			]),
+		title: 'Life Game'
+	};
 };
 var elm$browser$Browser$External = function (a) {
 	return {$: 'External', a: a};
@@ -6642,11 +6645,15 @@ var elm$url$Url$fromString = function (str) {
 		elm$url$Url$Https,
 		A2(elm$core$String$dropLeft, 8, str)) : elm$core$Maybe$Nothing);
 };
-var elm$browser$Browser$element = _Browser_element;
-var author$project$Main$main = elm$browser$Browser$element(
+var elm$browser$Browser$application = _Browser_application;
+var author$project$Main$main = elm$browser$Browser$application(
 	{
-		init: elm$core$Basics$always(
-			_Utils_Tuple2(author$project$Main$defaultModel, elm$core$Platform$Cmd$none)),
+		init: F3(
+			function (_n0, _n1, _n2) {
+				return _Utils_Tuple2(author$project$Main$defaultModel, elm$core$Platform$Cmd$none);
+			}),
+		onUrlChange: elm$core$Basics$always(author$project$Main$ChangeUrl),
+		onUrlRequest: elm$core$Basics$always(author$project$Main$ChangeUrl),
 		subscriptions: author$project$Main$subscriptions,
 		update: author$project$Main$update,
 		view: author$project$Main$view
