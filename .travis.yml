@@ -1,0 +1,7 @@
+language: elm
+cache:
+  timeout: 360
+  directories:
+  - ".elm-stuff/"
+script:
+- elm make src/Main.elm --output=docs/static/main.js
