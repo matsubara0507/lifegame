@@ -43,7 +43,8 @@ defaultModel =
                 , value = particle
                 , minFormatter = always ""
                 , maxFormatter = always ""
-                , currentValueFormatter = \n _ -> String.fromFloat n
+                , currentValueFormatter =
+                    \n _ -> String.concat [ "1列のマス数: ", String.fromFloat n ]
             }
 
         tickSlider =
@@ -54,7 +55,8 @@ defaultModel =
                 , value = 100.0
                 , minFormatter = always ""
                 , maxFormatter = always ""
-                , currentValueFormatter = \n _ -> String.fromFloat n
+                , currentValueFormatter =
+                    \n _ -> String.concat [ "更新間隔: ", String.fromFloat n, "ms" ]
             }
     in
     { interval = 1000
