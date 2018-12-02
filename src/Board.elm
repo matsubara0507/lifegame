@@ -1,4 +1,4 @@
-module Board exposing (Board, Cell(..), Msg(..), born, concatIndexedMapWith, init, kill, update, view)
+module Board exposing (Board, Cell(..), Msg(..), born, concatIndexedMapWith, init, kill, next, update, view)
 
 import Array exposing (Array)
 import Debug
@@ -23,6 +23,49 @@ type Cell
 init : Int -> Board
 init n =
     { particle = n, cells = Array.repeat (n * n) Dead, planting = False }
+
+
+next : Board -> Board
+next board =
+    { board | cells = Array.indexedMap (nextCell board) board.cells }
+
+
+nextCell : Board -> Int -> Cell -> Cell
+nextCell board idx cell =
+    case ( countAroundAliveCell board idx, cell ) of
+        ( 2, Alive ) ->
+            Alive
+
+        ( 3, _ ) ->
+            Alive
+
+        _ ->
+            Dead
+
+
+countAroundAliveCell : Board -> Int -> Int
+countAroundAliveCell board idx =
+    aroundCell board idx |> List.filter ((==) Alive) |> List.length
+
+
+aroundCell : Board -> Int -> List Cell
+aroundCell board idx =
+    [ if modBy board.particle idx == 0 then
+        -- Left end
+        []
+
+      else
+        [ idx - board.particle - 1, idx - 1, idx + board.particle - 1 ]
+    , [ idx - board.particle, idx + board.particle ]
+    , if modBy board.particle idx == board.particle - 1 then
+        -- Right end
+        []
+
+      else
+        [ idx - board.particle + 1, idx + 1, idx + board.particle + 1 ]
+    ]
+        |> List.concat
+        |> List.filterMap (\n -> Array.get n board.cells)
 
 
 concatIndexedMapWith : (List a -> b) -> (Int -> Cell -> a) -> Board -> b

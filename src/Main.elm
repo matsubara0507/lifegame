@@ -6,6 +6,7 @@ import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import SingleSlider
+import Time
 
 
 main : Program () Model Msg
@@ -53,6 +54,7 @@ defaultModel =
 type Msg
     = SliderMsg SingleSlider.Msg
     | BoardMsg Board.Msg
+    | NextTick
 
 
 update msg model =
@@ -72,6 +74,9 @@ update msg model =
         BoardMsg subMsg ->
             ( { model | board = Board.update subMsg model.board }, Cmd.none )
 
+        NextTick ->
+            ( { model | board = Board.next model.board }, Cmd.none )
+
 
 view model =
     div []
@@ -83,6 +88,12 @@ view model =
         ]
 
 
-subscriptions =
-    \model ->
-        Sub.map SliderMsg <| SingleSlider.subscriptions model.slider
+subscriptions model =
+    Sub.batch
+        [ Sub.map SliderMsg <| SingleSlider.subscriptions model.slider
+        , if model.board.planting then
+            Sub.none
+
+          else
+            Time.every 40.0 (always NextTick)
+        ]
