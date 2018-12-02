@@ -23,6 +23,7 @@ type alias Model =
     { interval : Int
     , board : Board
     , sizeSlider : SingleSlider.Model
+    , tickSlider : SingleSlider.Model
     }
 
 
@@ -44,15 +45,28 @@ defaultModel =
                 , maxFormatter = always ""
                 , currentValueFormatter = \n _ -> String.fromFloat n
             }
+
+        tickSlider =
+            { defaultSlider
+                | min = 50.0
+                , max = 1000.0
+                , step = 10.0
+                , value = 100.0
+                , minFormatter = always ""
+                , maxFormatter = always ""
+                , currentValueFormatter = \n _ -> String.fromFloat n
+            }
     in
     { interval = 1000
     , board = Board.init particle
     , sizeSlider = sizeSlider
+    , tickSlider = tickSlider
     }
 
 
 type Msg
     = SizeSliderMsg SingleSlider.Msg
+    | TickSliderMsg SingleSlider.Msg
     | BoardMsg Board.Msg
     | NextTick
 
@@ -71,6 +85,15 @@ update msg model =
             , Cmd.batch [ Cmd.map SizeSliderMsg cmd ]
             )
 
+        TickSliderMsg subMsg ->
+            let
+                ( updatedSlider, cmd, _ ) =
+                    SingleSlider.update subMsg model.tickSlider
+            in
+            ( { model | tickSlider = updatedSlider }
+            , Cmd.batch [ Cmd.map TickSliderMsg cmd ]
+            )
+
         BoardMsg subMsg ->
             ( { model | board = Board.update subMsg model.board }, Cmd.none )
 
@@ -79,11 +102,23 @@ update msg model =
 
 
 view model =
+    let
+        sliderAttrs =
+            [ style "margin-left" "10px"
+            , style "margin-right" "10px"
+            ]
+    in
     div []
         [ div
             [ style "text-align" "center"
+            , style "display" "flex"
+            , style "justify-content" "center"
             ]
-            [ Html.map SizeSliderMsg (SingleSlider.view model.sizeSlider) ]
+            [ div sliderAttrs
+                [ Html.map SizeSliderMsg (SingleSlider.view model.sizeSlider) ]
+            , div sliderAttrs
+                [ Html.map TickSliderMsg (SingleSlider.view model.tickSlider) ]
+            ]
         , Html.map BoardMsg (Board.view model.board)
         ]
 
@@ -95,5 +130,5 @@ subscriptions model =
             Sub.none
 
           else
-            Time.every 40.0 (always NextTick)
+            Time.every model.tickSlider.value (always NextTick)
         ]
