@@ -9,7 +9,7 @@ import String
 
 
 type alias Board =
-    { particle : Int
+    { size : Int
     , cells : Array Cell
     , planting : Bool
     }
@@ -22,7 +22,7 @@ type Cell
 
 init : Int -> Board
 init n =
-    { particle = n, cells = Array.repeat (n * n) Dead, planting = False }
+    { size = n, cells = Array.repeat (n * n) Dead, planting = False }
 
 
 next : Board -> Board
@@ -50,19 +50,19 @@ countAroundAliveCell board idx =
 
 aroundCell : Board -> Int -> List Cell
 aroundCell board idx =
-    [ if modBy board.particle idx == 0 then
+    [ if modBy board.size idx == 0 then
         -- Left end
         []
 
       else
-        [ idx - board.particle - 1, idx - 1, idx + board.particle - 1 ]
-    , [ idx - board.particle, idx + board.particle ]
-    , if modBy board.particle idx == board.particle - 1 then
+        [ idx - board.size - 1, idx - 1, idx + board.size - 1 ]
+    , [ idx - board.size, idx + board.size ]
+    , if modBy board.size idx == board.size - 1 then
         -- Right end
         []
 
       else
-        [ idx - board.particle + 1, idx + 1, idx + board.particle + 1 ]
+        [ idx - board.size + 1, idx + 1, idx + board.size + 1 ]
     ]
         |> List.concat
         |> List.filterMap (\n -> Array.get n board.cells)
@@ -118,8 +118,8 @@ viewCell : Board -> Int -> Cell -> Html Msg
 viewCell board idx cell =
     let
         styleAttrs =
-            [ style "width" (maxLength / toFloat board.particle |> vmin)
-            , style "height" (maxLength / toFloat board.particle |> vmin)
+            [ style "width" (maxLength / toFloat board.size |> vmin)
+            , style "height" (maxLength / toFloat board.size |> vmin)
             , style "margin" "0"
             , style "box-sizing" "border-box"
             , style "border" "0.2vmin solid gray"

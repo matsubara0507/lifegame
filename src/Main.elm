@@ -22,7 +22,7 @@ main =
 type alias Model =
     { interval : Int
     , board : Board
-    , slider : SingleSlider.Model
+    , sizeSlider : SingleSlider.Model
     }
 
 
@@ -34,7 +34,7 @@ defaultModel =
         defaultSlider =
             SingleSlider.defaultModel
 
-        slider =
+        sizeSlider =
             { defaultSlider
                 | min = 5.0
                 , max = 50.0
@@ -47,28 +47,28 @@ defaultModel =
     in
     { interval = 1000
     , board = Board.init particle
-    , slider = slider
+    , sizeSlider = sizeSlider
     }
 
 
 type Msg
-    = SliderMsg SingleSlider.Msg
+    = SizeSliderMsg SingleSlider.Msg
     | BoardMsg Board.Msg
     | NextTick
 
 
 update msg model =
     case msg of
-        SliderMsg subMsg ->
+        SizeSliderMsg subMsg ->
             let
                 ( updatedSlider, cmd, _ ) =
-                    SingleSlider.update subMsg model.slider
+                    SingleSlider.update subMsg model.sizeSlider
 
                 updatedBoard =
                     Board.init (truncate updatedSlider.value)
             in
-            ( { model | board = updatedBoard, slider = updatedSlider }
-            , Cmd.batch [ Cmd.map SliderMsg cmd ]
+            ( { model | board = updatedBoard, sizeSlider = updatedSlider }
+            , Cmd.batch [ Cmd.map SizeSliderMsg cmd ]
             )
 
         BoardMsg subMsg ->
@@ -83,14 +83,14 @@ view model =
         [ div
             [ style "text-align" "center"
             ]
-            [ Html.map SliderMsg (SingleSlider.view model.slider) ]
+            [ Html.map SizeSliderMsg (SingleSlider.view model.sizeSlider) ]
         , Html.map BoardMsg (Board.view model.board)
         ]
 
 
 subscriptions model =
     Sub.batch
-        [ Sub.map SliderMsg <| SingleSlider.subscriptions model.slider
+        [ Sub.map SizeSliderMsg <| SingleSlider.subscriptions model.sizeSlider
         , if model.board.planting then
             Sub.none
 
