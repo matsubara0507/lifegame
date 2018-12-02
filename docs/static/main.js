@@ -5573,7 +5573,7 @@ var elm$core$String$concat = function (strings) {
 	return A2(elm$core$String$join, '', strings);
 };
 var author$project$Main$initModel = function (url) {
-	var particle = 30;
+	var size = 30;
 	var defaultSlider = carwow$elm_slider$SingleSlider$defaultModel;
 	var sizeSlider = _Utils_update(
 		defaultSlider,
@@ -5592,7 +5592,7 @@ var author$project$Main$initModel = function (url) {
 			min: 5.0,
 			minFormatter: elm$core$Basics$always(''),
 			step: 1.0,
-			value: particle
+			value: size
 		});
 	var tickSlider = _Utils_update(
 		defaultSlider,
@@ -5617,9 +5617,8 @@ var author$project$Main$initModel = function (url) {
 	return {
 		board: A2(
 			author$project$Board$init,
-			particle,
+			size,
 			author$project$Main$parseUrl(url)),
-		interval: 1000,
 		sizeSlider: sizeSlider,
 		tickSlider: tickSlider
 	};

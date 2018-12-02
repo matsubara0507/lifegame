@@ -24,8 +24,7 @@ main =
 
 
 type alias Model =
-    { interval : Int
-    , board : Board
+    { board : Board
     , sizeSlider : SingleSlider.Model
     , tickSlider : SingleSlider.Model
     }
@@ -33,7 +32,7 @@ type alias Model =
 
 initModel url =
     let
-        particle =
+        size =
             30
 
         defaultSlider =
@@ -44,7 +43,7 @@ initModel url =
                 | min = 5.0
                 , max = 50.0
                 , step = 1.0
-                , value = particle
+                , value = size
                 , minFormatter = always ""
                 , maxFormatter = always ""
                 , currentValueFormatter =
@@ -63,8 +62,7 @@ initModel url =
                     \n _ -> String.concat [ "更新間隔: ", String.fromFloat n, "ms" ]
             }
     in
-    { interval = 1000
-    , board = Board.init particle (parseUrl url)
+    { board = Board.init size (parseUrl url)
     , sizeSlider = sizeSlider
     , tickSlider = tickSlider
     }
