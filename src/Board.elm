@@ -78,6 +78,8 @@ viewCell board idx cell =
             [ style "width" (maxLength / toFloat board.particle |> vmin)
             , style "height" (maxLength / toFloat board.particle |> vmin)
             , style "margin" "0"
+            , style "box-sizing" "border-box"
+            , style "border" "0.2vmin solid gray"
             ]
 
         bornAttr =
@@ -92,7 +94,7 @@ viewCell board idx cell =
         imageLink =
             case cell of
                 Dead ->
-                    []
+                    [ src "static/image/null.png" ]
 
                 Alive ->
                     [ src "https://avatars0.githubusercontent.com/u/4686622?s=400&v=4" ]
