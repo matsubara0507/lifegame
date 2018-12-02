@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg(..), main, update, view)
+module Main exposing (Model, Msg(..), defaultLinks, initModel, main, parseUrl)
 
 import Board exposing (..)
 import Browser
@@ -7,17 +7,19 @@ import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import SingleSlider
 import Time
+import Url.Parser as Url exposing ((</>), (<?>))
+import Url.Parser.Query as UrlQuery
 
 
 main : Program () Model Msg
 main =
     Browser.application
-        { init = \_ _ _ -> ( defaultModel, Cmd.none )
+        { init = \_ url _ -> ( initModel url, Cmd.none )
         , update = update
         , view = view
         , subscriptions = subscriptions
-        , onUrlRequest = always ChangeUrl
-        , onUrlChange = always ChangeUrl
+        , onUrlRequest = always (ChangeUrl defaultLinks)
+        , onUrlChange = \url -> ChangeUrl (parseUrl url)
         }
 
 
@@ -29,7 +31,7 @@ type alias Model =
     }
 
 
-defaultModel =
+initModel url =
     let
         particle =
             30
@@ -62,10 +64,32 @@ defaultModel =
             }
     in
     { interval = 1000
-    , board = Board.init particle
+    , board = Board.init particle (parseUrl url)
     , sizeSlider = sizeSlider
     , tickSlider = tickSlider
     }
+
+
+defaultLinks =
+    { alive = "static/image/alive.png"
+    , dead = "static/image/dead.png"
+    }
+
+
+parseUrl url =
+    let
+        queryParser =
+            UrlQuery.map2
+                Board.Links
+                (UrlQuery.string "alive" |> UrlQuery.map (Maybe.withDefault ""))
+                (UrlQuery.string "dead" |> UrlQuery.map (Maybe.withDefault defaultLinks.dead))
+
+        parser =
+            Url.top </> Url.top <?> queryParser
+    in
+    { url | path = "" }
+        |> Url.parse parser
+        |> Maybe.withDefault defaultLinks
 
 
 type Msg
@@ -73,7 +97,7 @@ type Msg
     | TickSliderMsg SingleSlider.Msg
     | BoardMsg Board.Msg
     | NextTick
-    | ChangeUrl
+    | ChangeUrl Links
 
 
 update msg model =
@@ -84,7 +108,7 @@ update msg model =
                     SingleSlider.update subMsg model.sizeSlider
 
                 updatedBoard =
-                    Board.init (truncate updatedSlider.value)
+                    Board.init (truncate updatedSlider.value) model.board.links
             in
             ( { model | board = updatedBoard, sizeSlider = updatedSlider }
             , Cmd.batch [ Cmd.map SizeSliderMsg cmd ]
@@ -105,8 +129,15 @@ update msg model =
         NextTick ->
             ( { model | board = Board.next model.board }, Cmd.none )
 
-        ChangeUrl ->
-            ( model, Cmd.none )
+        ChangeUrl links ->
+            let
+                board =
+                    model.board
+
+                updatedBoard =
+                    { board | links = links }
+            in
+            ( { model | board = updatedBoard }, Cmd.none )
 
 
 view model =

@@ -1,4 +1,4 @@
-module Board exposing (Board, Cell(..), Msg(..), born, concatIndexedMapWith, init, kill, next, update, view)
+module Board exposing (Board, Cell(..), Links, Msg(..), born, concatIndexedMapWith, init, kill, next, update, view)
 
 import Array exposing (Array)
 import Debug
@@ -12,6 +12,13 @@ type alias Board =
     { size : Int
     , cells : Array Cell
     , planting : Bool
+    , links : Links
+    }
+
+
+type alias Links =
+    { alive : String
+    , dead : String
     }
 
 
@@ -20,9 +27,13 @@ type Cell
     | Alive
 
 
-init : Int -> Board
-init n =
-    { size = n, cells = Array.repeat (n * n) Dead, planting = False }
+init : Int -> Links -> Board
+init n links =
+    { size = n
+    , cells = Array.repeat (n * n) Dead
+    , planting = False
+    , links = links
+    }
 
 
 next : Board -> Board
@@ -137,10 +148,10 @@ viewCell board idx cell =
         imageLink =
             case cell of
                 Dead ->
-                    [ src "static/image/null.png" ]
+                    [ src board.links.dead ]
 
                 Alive ->
-                    [ src "https://avatars0.githubusercontent.com/u/4686622?s=400&v=4" ]
+                    [ src board.links.alive ]
     in
     Html.img (List.concat [ styleAttrs, bornAttr, imageLink ]) []
 
