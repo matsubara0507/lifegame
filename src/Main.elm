@@ -79,7 +79,7 @@ parseUrl url =
         queryParser =
             UrlQuery.map2
                 Board.Links
-                (UrlQuery.string "alive" |> UrlQuery.map (Maybe.withDefault ""))
+                (UrlQuery.string "alive" |> UrlQuery.map (Maybe.withDefault defaultLinks.alive))
                 (UrlQuery.string "dead" |> UrlQuery.map (Maybe.withDefault defaultLinks.dead))
 
         parser =

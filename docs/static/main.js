@@ -5532,7 +5532,7 @@ var author$project$Main$parseUrl = function (url) {
 		author$project$Board$Links,
 		A2(
 			elm$url$Url$Parser$Query$map,
-			elm$core$Maybe$withDefault(''),
+			elm$core$Maybe$withDefault(author$project$Main$defaultLinks.alive),
 			elm$url$Url$Parser$Query$string('alive')),
 		A2(
 			elm$url$Url$Parser$Query$map,
