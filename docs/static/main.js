@@ -6689,7 +6689,6 @@ var mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onWithOptions = F3(
 				mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$eventDecoder));
 	});
 var mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onDown = A2(mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onWithOptions, 'pointerdown', mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$defaultOptions);
-var mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onOver = A2(mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onWithOptions, 'pointerover', mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$defaultOptions);
 var author$project$Board$viewCell = F3(
 	function (board, idx, cell) {
 		var styleAttrs = _List_fromArray(
@@ -6723,7 +6722,10 @@ var author$project$Board$viewCell = F3(
 			[
 				mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onDown(
 				elm$core$Basics$always(author$project$Board$Planting)),
-				mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onOver(
+				A3(
+				mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onWithOptions,
+				'pointermove',
+				{preventDefault: true, stopPropagation: false},
 				elm$core$Basics$always(
 					author$project$Board$Born(idx)))
 			]) : _List_fromArray(

@@ -139,7 +139,10 @@ viewCell board idx cell =
         bornAttr =
             if board.planting then
                 [ Pointer.onDown (always Planting)
-                , Pointer.onOver (always (Born idx))
+                , Pointer.onWithOptions
+                    "pointermove"
+                    { stopPropagation = False, preventDefault = True }
+                    (always (Born idx))
                 ]
 
             else
