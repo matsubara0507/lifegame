@@ -122,7 +122,11 @@ update msg model =
             )
 
         BoardMsg subMsg ->
-            ( { model | board = Board.update subMsg model.board }, Cmd.none )
+            let
+                ( updatedBoard, cmd ) =
+                    Board.update subMsg model.board
+            in
+            ( { model | board = updatedBoard }, Cmd.map BoardMsg cmd )
 
         NextTick ->
             ( { model | board = Board.next model.board }, Cmd.none )

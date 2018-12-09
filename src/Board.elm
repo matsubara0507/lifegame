@@ -1,11 +1,14 @@
 module Board exposing (Board, Cell(..), Links, Msg(..), born, concatIndexedMapWith, init, kill, next, update, view)
 
 import Array exposing (Array)
+import Browser.Dom as Dom exposing (Element)
 import Debug
 import Html exposing (Html)
-import Html.Attributes exposing (src, style)
+import Html.Attributes exposing (id, src, style)
 import Html.Events.Extra.Pointer as Pointer
+import Html.Events.Extra.Touch as Touch
 import String
+import Task
 
 
 type alias Board =
@@ -13,6 +16,7 @@ type alias Board =
     , cells : Array Cell
     , planting : Bool
     , links : Links
+    , touchPos : ( Float, Float )
     }
 
 
@@ -33,6 +37,7 @@ init n links =
     , cells = Array.repeat (n * n) Dead
     , planting = False
     , links = links
+    , touchPos = ( 0, 0 )
     }
 
 
@@ -90,16 +95,44 @@ concatIndexedMapWith f g board =
 type Msg
     = Born Int
     | Planting
+    | TouchMovePos ( Float, Float )
+    | BornWithTouch (Maybe Element)
 
 
-update : Msg -> Board -> Board
+update : Msg -> Board -> ( Board, Cmd Msg )
 update msg board =
     case msg of
         Born idx ->
-            born idx board
+            ( born idx board, Cmd.none )
 
         Planting ->
-            { board | planting = xor board.planting True }
+            ( { board | planting = xor board.planting True }, Cmd.none )
+
+        TouchMovePos pos ->
+            ( { board | touchPos = pos }
+            , Dom.getElement "board"
+                |> Task.attempt (BornWithTouch << Result.toMaybe)
+            )
+
+        BornWithTouch Nothing ->
+            ( board, Cmd.none )
+
+        BornWithTouch (Just elem) ->
+            let
+                ( px, py ) =
+                    ( elem.element.width / toFloat board.size
+                    , elem.element.height / toFloat board.size
+                    )
+
+                ( tx, ty ) =
+                    board.touchPos
+
+                ( x, y ) =
+                    ( (tx - elem.element.x) / px |> floor
+                    , (ty - elem.element.y) / py |> floor
+                    )
+            in
+            ( born (y * board.size + x) board, Cmd.none )
 
 
 born : Int -> Board -> Board
@@ -116,13 +149,26 @@ view : Board -> Html Msg
 view board =
     let
         attr =
-            [ style "width" (maxLength |> vmin)
+            [ id "board"
+            , style "width" (maxLength |> vmin)
             , style "height" (maxLength |> vmin)
             , style "margin-left" "auto"
             , style "margin-right" "auto"
             ]
+
+        getTouchPos event =
+            List.head event.targetTouches
+                |> Maybe.map .clientPos
+                |> Maybe.withDefault ( 0, 0 )
+
+        bornAttr =
+            [ Touch.onWithOptions
+                "touchmove"
+                { stopPropagation = False, preventDefault = True }
+                (TouchMovePos << getTouchPos)
+            ]
     in
-    concatIndexedMapWith (Html.div attr) (viewCell board) board
+    concatIndexedMapWith (Html.div (attr ++ bornAttr)) (viewCell board) board
 
 
 viewCell : Board -> Int -> Cell -> Html Msg
@@ -139,10 +185,7 @@ viewCell board idx cell =
         bornAttr =
             if board.planting then
                 [ Pointer.onDown (always Planting)
-                , Pointer.onWithOptions
-                    "pointermove"
-                    { stopPropagation = False, preventDefault = True }
-                    (always (Born idx))
+                , Pointer.onOver (always (Born idx))
                 ]
 
             else
